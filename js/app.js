@@ -3,6 +3,7 @@ const CONFIG = {
   apiUrl: 'https://api.minimaxi.chat/v1/text/chatcompletion_v2',
   model: 'MiniMax-Text-01',
   storageKey: 'ps_minimax_key',
+  groupIdKey: 'ps_minimax_group_id',
 };
 
 /* ===== 系统提示词 ===== */
@@ -69,12 +70,12 @@ function hideModal() {
 
 function saveApiKey() {
   const key = document.getElementById('apiKeyInput').value.trim();
+  const groupId = document.getElementById('groupIdInput').value.trim();
   const errEl = document.getElementById('modalError');
-  if (!key) {
-    errEl.textContent = '请输入 API Key';
-    return;
-  }
+  if (!key) { errEl.textContent = '请输入 API Key'; return; }
+  if (!groupId) { errEl.textContent = '请输入 Group ID'; return; }
   localStorage.setItem(CONFIG.storageKey, key);
+  localStorage.setItem(CONFIG.groupIdKey, groupId);
   errEl.textContent = '';
   hideModal();
   showWelcome();
@@ -82,6 +83,7 @@ function saveApiKey() {
 
 function openSettings() {
   document.getElementById('apiKeyInput').value = localStorage.getItem(CONFIG.storageKey) || '';
+  document.getElementById('groupIdInput').value = localStorage.getItem(CONFIG.groupIdKey) || '';
   document.getElementById('modalError').textContent = '';
   showModal();
 }
@@ -227,9 +229,12 @@ async function callAPI(apiKey) {
     max_tokens: 2048,
   };
 
+  const groupId = localStorage.getItem(CONFIG.groupIdKey) || '';
+  const url = `${CONFIG.apiUrl}?GroupId=${groupId}`;
+
   let res;
   try {
-    res = await fetch(CONFIG.apiUrl, {
+    res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
