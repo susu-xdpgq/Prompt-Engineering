@@ -227,23 +227,41 @@ async function callAPI(apiKey) {
     max_tokens: 2048,
   };
 
-  const res = await fetch(CONFIG.apiUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error?.message || `HTTP ${res.status}`);
+  let res;
+  try {
+    res = await fetch(CONFIG.apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (networkErr) {
+    throw new Error('网络请求失败，可能是跨域(CORS)限制，请检查网络或稍后重试');
   }
 
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new Error('返回数据格式异常');
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    // MiniMax 错误格式
+    const msg = data?.error?.message
+      || data?.base_resp?.status_msg
+      || `HTTP ${res.status}`;
+    throw new Error(msg);
+  }
+
+  // MiniMax base_resp 业务错误
+  if (data?.base_resp?.status_code && data.base_resp.status_code !== 0) {
+    throw new Error(`MiniMax 错误：${data.base_resp.status_msg}（code: ${data.base_resp.status_code}）`);
+  }
+
+  const content = data?.choices?.[0]?.message?.content;
+  if (!content) {
+    // 把原始响应打印出来方便排查
+    console.error('MiniMax 原始响应：', JSON.stringify(data));
+    throw new Error(`响应格式异常，请打开浏览器控制台(F12)查看详情`);
+  }
   return content;
 }
 
