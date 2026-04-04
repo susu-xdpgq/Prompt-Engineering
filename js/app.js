@@ -1,6 +1,6 @@
 /* ===== 配置 ===== */
 const CONFIG = {
-  apiUrl: 'https://api.minimax.chat/v1/text/chatcompletion_v2',
+  apiUrl: 'https://api.minimaxi.chat/v1/text/chatcompletion_v2',
   model: 'MiniMax-Text-01',
   storageKey: 'ps_minimax_key',
 };
