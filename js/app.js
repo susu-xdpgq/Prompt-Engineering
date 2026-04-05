@@ -1,7 +1,7 @@
 /* ===== 配置 ===== */
 const CONFIG = {
-  apiUrl: 'https://api.minimaxi.chat/v1/text/chatcompletion_v2',
-  model: 'MiniMax-Text-01',
+  apiUrl: 'https://api.minimaxi.com/v1/text/chatcompletion_v2',
+  model: 'MiniMax-M2.7',
   storageKey: 'ps_minimax_key',
   groupIdKey: 'ps_minimax_group_id',
 };
